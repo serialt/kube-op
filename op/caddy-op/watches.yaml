@@ -1,6 +1,0 @@
-# Use the 'create api' subcommand to add watches to this file.
-- group: web.example.com
-  version: v1
-  kind: Caddy
-  chart: helm-charts/caddy
-# +kubebuilder:scaffold:watch
