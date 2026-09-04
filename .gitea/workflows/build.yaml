@@ -15,7 +15,6 @@ jobs:
           # 优先读取 Gitea 特有的 GITEA_REF，若无则使用 GITHUB_REF
           REF_NAME="${GITEA_REF:-$GITHUB_REF}"
           REGISTRY="registry.cn-hangzhou.aliyuncs.com/serialt/caddy-op"
-
           if [[ "$REF_NAME" == refs/tags/* ]]; then
             # 匹配 Tag 推送: 提取 v1.0.0
             TAG_NAME="${REF_NAME#refs/tags/}"
