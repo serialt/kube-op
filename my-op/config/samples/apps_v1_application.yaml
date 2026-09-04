@@ -1,0 +1,11 @@
+apiVersion: apps.imau.cc/v1
+kind: Application
+metadata:
+  name: application-sample
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: nginx
+          image: registry.cn-hangzhou.aliyuncs.com/serialt/nginx:1.29.4-alpine

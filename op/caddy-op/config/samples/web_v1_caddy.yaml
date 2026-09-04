@@ -1,0 +1,12 @@
+apiVersion: web.example.com/v1
+kind: Caddy
+metadata:
+  name: caddy
+spec:
+  replicaCount: 2
+  image:
+    repository: registry.cn-hangzhou.aliyuncs.com/serialt/nginx
+    tag: "1.29.6-alpine"
+  
+  
+  
