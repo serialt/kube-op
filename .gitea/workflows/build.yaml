@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: http://172.12.78.53:5000/krab/checkout@v7
       - name: Build and Push Docker Image
         run: |
           # 优先读取 Gitea 特有的 GITEA_REF，若无则使用 GITHUB_REF
