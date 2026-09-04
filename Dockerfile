@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM egistry.cn-hangzhou.aliyuncs.com/serialt/golang:1.24 AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/serialt/golang:1.24 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
