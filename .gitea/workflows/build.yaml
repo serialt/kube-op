@@ -7,6 +7,14 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      HOME: /root
+      GOPROXY: https://goproxy.cn,direct 
+      GOBIN: /root/go/bin
+      GOROOT: /root/sdk/go
+      GOPATH: /root/go
+      GOCACHE: /tmp/go-build-cache
+      GOMODCACHE: /tmp/go-mod-cache
     steps:
       - name: Checkout
         uses: http://172.12.78.53:5000/krab/checkout@v7
@@ -23,8 +31,4 @@ jobs:
             TAG_NAME="dev-$(date +%Y%m%d%H%M%S)"
           fi
           IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
-          export GOPROXY=https://goproxy.cn,direct 
-          export GOBIN=/root/go/bin
-          export GOROOT=/root/sdk/go
-          export GOPATH=/root/go
           make && make docker-build docker-push IMG="${IMAGE_TAG}"
