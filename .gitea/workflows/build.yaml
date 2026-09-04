@@ -31,4 +31,4 @@ jobs:
             TAG_NAME="dev-$(date +%Y%m%d%H%M%S)"
           fi
           IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
-          make && make docker-build docker-push IMG="${IMAGE_TAG}"
+          make docker-build docker-push IMG="${IMAGE_TAG}"
