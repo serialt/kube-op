@@ -1,0 +1,9 @@
+apiVersion: web.local.com/v1
+kind: Caddy
+metadata:
+  labels:
+    app.kubernetes.io/name: kube-op
+    app.kubernetes.io/managed-by: kustomize
+  name: caddy-sample
+spec:
+  # TODO(user): Add fields here
