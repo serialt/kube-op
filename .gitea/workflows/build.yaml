@@ -1,0 +1,29 @@
+name: Build and Push Docker Image
+on:
+  push:
+    branches: [ '*' ]
+    tags: [ '*' ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build and Push Docker Image
+        run: |
+          # 优先读取 Gitea 特有的 GITEA_REF，若无则使用 GITHUB_REF
+          REF_NAME="${GITEA_REF:-$GITHUB_REF}"
+          REGISTRY="registry.cn-hangzhou.aliyuncs.com/serialt/caddy-op"
+
+          if [[ "$REF_NAME" == refs/tags/* ]]; then
+            # 匹配 Tag 推送: 提取 v1.0.0
+            TAG_NAME="${REF_NAME#refs/tags/}"
+          else
+            # 匹配普通分支推送: 生成时间戳 dev-YYYYMMDDHHMMSS
+            TAG_NAME="dev-$(date +%Y%m%d%H%M%S)"
+          fi
+
+          IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
+
+          make && make docker-build docker-push IMG="${IMAGE_TAG}"
