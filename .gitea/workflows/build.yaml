@@ -22,7 +22,9 @@ jobs:
             # 匹配普通分支推送: 生成时间戳 dev-YYYYMMDDHHMMSS
             TAG_NAME="dev-$(date +%Y%m%d%H%M%S)"
           fi
-          source ~/.bashrc 
           IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
           export GOPROXY=https://goproxy.cn,direct 
+          export GOBIN=/root/go/bin
+          export GOROOT=/root/sdk/go
+          export GOPATH=/root/go
           make && make docker-build docker-push IMG="${IMAGE_TAG}"
