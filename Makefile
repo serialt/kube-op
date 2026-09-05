@@ -59,6 +59,13 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+CHART_NAME ?= caddy-operator
+CHART_DIR ?= dist/caddy-operator
+CHART_VERSION ?= ${VERSION}
+APP_VERSION ?= latest
+HELM_REGISTRY ?= quay.io/serialt
+HELM_REPO ?= $(HELM_REGISTRY)/charts
+
 # CONTAINER_TOOL defines the container tool to be used for building images.
 # Be aware that the target commands are only tested with Docker which is
 # scaffolded by default. However, you might want to replace it to use other
@@ -360,3 +367,35 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+
+.PHONY: helmify
+helmify: $(HELMIFY)
+
+$(HELMIFY): $(LOCALBIN)
+	@test -s $(HELMIFY) || \
+	GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
+
+.PHONY: helm
+helm: manifests kustomize helmify
+	rm -rf $(CHART_DIR)
+	mkdir -p $(dir $(CHART_DIR))
+	$(KUSTOMIZE) build config/default | helmify $(CHART_DIR)
+
+.PHONY: helm-lint
+helm-lint: helm
+	helm lint $(CHART_DIR)
+
+.PHONY: helm-package
+helm-package: helm-lint
+	mkdir -p dist
+	helm package $(CHART_DIR) \
+		--destination dist \
+		--version $(CHART_VERSION) \
+		--app-version $(APP_VERSION)
+
+.PHONY: helm-push
+helm-push: helm-package
+	helm push \
+		dist/$(CHART_NAME)-$(CHART_VERSION).tgz \
+		oci://$(HELM_REPO)
