@@ -33,6 +33,7 @@ jobs:
           IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
           source /etc/profile.d/env.sh 
           make docker-build docker-push IMG="${IMAGE_TAG}"
+          make helm-push VERSION="${TAG_NAME}"
 
           dingtalk_send() {
             local token="cd316d9df306852b6da7d10b3107d852d9a4ad0572a6c4e78cb84c8cacc2c4e5" secret="SECa87a39d5b80e32426d61fe35806fa6f07a9e54cebb29b84bea1d3522c5a71563" title="$1" msg="$2" ts sign
