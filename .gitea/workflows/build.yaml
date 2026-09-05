@@ -31,4 +31,6 @@ jobs:
             TAG_NAME="dev-$(date +%Y%m%d%H%M%S)"
           fi
           IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
+          source /etc/profile.d/env.sh 
+          make
           make docker-build docker-push IMG="${IMAGE_TAG}"
