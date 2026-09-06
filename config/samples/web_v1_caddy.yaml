@@ -6,4 +6,8 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: caddy-sample
 spec:
-  # TODO(user): Add fields here
+  replicas: 2
+  image: registry.cn-hangzhou.aliyuncs.com/serialt/caddy:2.10-alpine
+  port: 80
+  svcPort: 80
+
