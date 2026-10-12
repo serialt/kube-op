@@ -5,8 +5,9 @@ metadata:
     app.kubernetes.io/name: kube-op
     app.kubernetes.io/managed-by: kustomize
   name: caddy-sample
+  namespace: dev
 spec:
-  replicas: 2
+  replicas: 3
   image: registry.cn-hangzhou.aliyuncs.com/serialt/caddy:2.10-alpine
   port: 80
   svcPort: 80

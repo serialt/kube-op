@@ -20,6 +20,7 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -45,6 +46,7 @@ type CaddyReconciler struct {
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 
 func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
@@ -138,6 +140,59 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	logger.Info("Service操作结果", "result", result)
 
+	ingress := &networkingv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      caddy.Name,
+			Namespace: caddy.Namespace,
+		},
+	}
+	if caddy.Spec.Domain == "" {
+		if err := r.Get(ctx, client.ObjectKeyFromObject(ingress), ingress); err != nil && !apierrors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		} else if err == nil && metav1.IsControlledBy(ingress, &caddy) {
+			if err := r.Delete(ctx, ingress); err != nil {
+				return ctrl.Result{}, err
+			}
+			logger.Info("Ingress deleted because domain is not configured")
+		}
+		return ctrl.Result{}, nil
+	}
+
+	pathType := networkingv1.PathTypePrefix
+	result, err = controllerutil.CreateOrUpdate(ctx, r.Client, ingress, func() error {
+		ingress.Spec = networkingv1.IngressSpec{
+			Rules: []networkingv1.IngressRule{
+				{
+					Host: caddy.Spec.Domain,
+					IngressRuleValue: networkingv1.IngressRuleValue{
+						HTTP: &networkingv1.HTTPIngressRuleValue{
+							Paths: []networkingv1.HTTPIngressPath{
+								{
+									Path:     "/",
+									PathType: &pathType,
+									Backend: networkingv1.IngressBackend{
+										Service: &networkingv1.IngressServiceBackend{
+											Name: caddy.Name,
+											Port: networkingv1.ServiceBackendPort{
+												Number: caddy.Spec.SvcPort,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		return controllerutil.SetControllerReference(&caddy, ingress, r.Scheme)
+	})
+	if err != nil {
+		logger.Error(err, "Failed to create or update Ingress")
+		return ctrl.Result{}, err
+	}
+	logger.Info("Ingress操作结果", "result", result)
+
 	return ctrl.Result{}, nil
 }
 
@@ -147,5 +202,6 @@ func (r *CaddyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&webv1.Caddy{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
+		Owns(&networkingv1.Ingress{}).
 		Complete(r)
 }

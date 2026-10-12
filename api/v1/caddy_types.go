@@ -28,10 +28,11 @@ type CaddySpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Replicas int32  `json:"replicas"` // 对应 YAML 的 `spec.replicas`
-	Image    string `json:"image"`    // 对应 YAML 的 `spec.image`
-	Port     int32  `json:"port"`     // 应用监听的端口
-	SvcPort  int32  `json:"svcPort"`  // Service 暴露的端口
+	Replicas int32  `json:"replicas"`         // 对应 YAML 的 `spec.replicas`
+	Image    string `json:"image"`            // 对应 YAML 的 `spec.image`
+	Port     int32  `json:"port"`             // 应用监听的端口
+	SvcPort  int32  `json:"svcPort"`          // Service 暴露的端口
+	Domain   string `json:"domain,omitempty"` // Ingress 暴露使用的域名；未设置时不创建 Ingress
 }
 
 // CaddyStatus defines the observed state of Caddy.

@@ -21,6 +21,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -51,7 +52,13 @@ var _ = Describe("Caddy Controller", func() {
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					// TODO(user): Specify other spec details if needed.
+					Spec: webv1.CaddySpec{
+						Replicas: 1,
+						Image:    "caddy:2",
+						Port:     80,
+						SvcPort:  80,
+						Domain:   "caddy.example.com",
+					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
@@ -77,8 +84,21 @@ var _ = Describe("Caddy Controller", func() {
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
+
+			ingress := &networkingv1.Ingress{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, ingress)).To(Succeed())
+			Expect(ingress.Spec.Rules).To(HaveLen(1))
+			Expect(ingress.Spec.Rules[0].Host).To(Equal("caddy.example.com"))
+			Expect(ingress.Spec.Rules[0].HTTP.Paths).To(HaveLen(1))
+			Expect(ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name).To(Equal(resourceName))
+			Expect(ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Port.Number).To(Equal(int32(80)))
+
+			Expect(k8sClient.Get(ctx, typeNamespacedName, caddy)).To(Succeed())
+			caddy.Spec.Domain = ""
+			Expect(k8sClient.Update(ctx, caddy)).To(Succeed())
+			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(k8sClient.Get(ctx, typeNamespacedName, ingress)).To(MatchError(errors.IsNotFound, "be a not found error"))
 		})
 	})
 })

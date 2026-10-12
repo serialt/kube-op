@@ -39,6 +39,8 @@ spec:
           spec:
             description: CaddySpec defines the desired state of Caddy.
             properties:
+              domain:
+                type: string
               image:
                 type: string
               port:
