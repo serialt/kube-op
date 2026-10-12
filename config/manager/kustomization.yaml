@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: registry.cn-hangzhou.aliyuncs.com/serialt/caddy-op
-  newTag: 0.0.1
+  newTag: dev-20261012134713

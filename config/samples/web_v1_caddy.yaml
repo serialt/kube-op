@@ -11,4 +11,5 @@ spec:
   image: registry.cn-hangzhou.aliyuncs.com/serialt/caddy:2.10-alpine
   port: 80
   svcPort: 80
+  domain: kubeop.ct.imau.cc
 
