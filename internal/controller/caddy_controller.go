@@ -185,6 +185,9 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 				},
 			},
 		}
+		if caddy.Spec.IngressClassName != "" {
+			ingress.Spec.IngressClassName = &caddy.Spec.IngressClassName
+		}
 		return controllerutil.SetControllerReference(&caddy, ingress, r.Scheme)
 	})
 	if err != nil {
