@@ -114,6 +114,23 @@ make install
 make deploy IMG=<some-registry>/caddy-op:<tag>
 ```
 
+Remove the sample resource, controller, and CRD when finished:
+
+```sh
+kubectl delete -k config/samples/
+make undeploy
+make uninstall
+kubectl delete namespace dev
+```
+
+The same cleanup can be done directly with `kubectl`:
+
+```sh
+kubectl delete -k config/samples/ --ignore-not-found=true
+kubectl delete -k config/default --ignore-not-found=true
+kubectl delete namespace dev --ignore-not-found=true
+```
+
 Run the unit tests with:
 
 ```sh
