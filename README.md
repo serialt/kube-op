@@ -110,8 +110,16 @@ make manifests
 Install the CRDs and deploy the controller to the current Kubernetes context:
 
 ```sh
+kubectl create namespace dev
 make install
 make deploy IMG=<some-registry>/caddy-op:<tag>
+```
+
+Verify the controller by applying the sample and waiting for its Deployment:
+
+```sh
+kubectl apply -k config/samples/
+kubectl get service,ingress caddy-sample -n dev
 ```
 
 Remove the sample resource, controller, and CRD when finished:
