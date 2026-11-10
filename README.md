@@ -101,6 +101,19 @@ kubectl delete namespace dev
 
 ## Development
 
+Regenerate CRDs and RBAC manifests after changing API definitions:
+
+```sh
+make manifests
+```
+
+Install the CRDs and deploy the controller to the current Kubernetes context:
+
+```sh
+make install
+make deploy IMG=<some-registry>/caddy-op:<tag>
+```
+
 Run the unit tests with:
 
 ```sh
