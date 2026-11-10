@@ -36,13 +36,14 @@ jobs:
           REF_NAME="$GITHUB_REF"
           REGISTRY="${REGISTRY}/${IMAGE_NAME}"
           QUAY_IMAGE="${QUAY_IMAGE}/${IMAGE_NAME}"
-          CHART="FALSE"
           CHART_ADDRESS=""
           if [[ "$REF_NAME" == refs/tags/* ]]; then
             TAG_NAME="${REF_NAME#refs/tags/}"
-            CHART="TRUE"
+            CHART_VERSION="$TAG_NAME"
           else
-            TAG_NAME="dev-$(date +%Y%m%d%H%M%S)"
+            BUILD_TIMESTAMP="$(date +%Y%m%d%H%M%S)"
+            TAG_NAME="dev-${BUILD_TIMESTAMP}"
+            CHART_VERSION="0.0.0-dev.${BUILD_TIMESTAMP}"
           fi
           IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
 
@@ -54,13 +55,11 @@ jobs:
           docker tag "$IMAGE_TAG" "${QUAY_IMAGE}:${TAG_NAME}"
           docker push "${QUAY_IMAGE}:${TAG_NAME}"
 
-          if [[ "$CHART" == "TRUE" ]]; then
-            printf '%s' "$QUAY_PASSWORD" | helm registry login "$QUAY_HOST" \
-              --username "$QUAY_USERNAME" --password-stdin
-            make helm-push VERSION="${TAG_NAME}" CHART_NAME="${CHART_NAME}" \
-              HELM_REPO="${CHART_REPO}"
-            CHART_ADDRESS="oci://${CHART_REPO}/${CHART_NAME}:${TAG_NAME}"
-          fi
+          printf '%s' "$QUAY_PASSWORD" | helm registry login "$QUAY_HOST" \
+            --username "$QUAY_USERNAME" --password-stdin
+          make helm-push VERSION="${CHART_VERSION}" CHART_NAME="${CHART_NAME}" \
+            HELM_REPO="${CHART_REPO}"
+          CHART_ADDRESS="oci://${CHART_REPO}/${CHART_NAME}:${CHART_VERSION}"
 
           dingtalk_send() {
             local title="$1" msg="$2" ts sign
