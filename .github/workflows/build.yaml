@@ -83,3 +83,7 @@ jobs:
             fi
             dingtalk_send "GitHub Action" "$msg"
           fi
+
+          docker logout "$REGISTRY_HOST"
+          docker logout "$QUAY_HOST"
+          helm registry logout "$QUAY_HOST"
