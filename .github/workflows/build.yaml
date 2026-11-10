@@ -1,0 +1,76 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+
+env:
+  IMAGE_NAME: caddy-op
+  REGISTRY_HOST: registry.cn-hangzhou.aliyuncs.com
+  REGISTRY: registry.cn-hangzhou.aliyuncs.com/serialt
+  QUAY_HOST: quay.io
+  QUAY_IMAGE: quay.io/serialt
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build and Push Docker Image
+        env:
+          REGISTRY_USERNAME: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+          DINGTALK_ACCESS_TOKEN: ${{ secrets.DINGTALK_ACCESS_TOKEN }}
+          DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
+        run: |
+          REF_NAME="$GITHUB_REF"
+          REGISTRY="${REGISTRY}/${IMAGE_NAME}"
+          QUAY_IMAGE="${QUAY_IMAGE}/${IMAGE_NAME}"
+          CHART="FALSE"
+          if [[ "$REF_NAME" == refs/tags/* ]]; then
+            TAG_NAME="${REF_NAME#refs/tags/}"
+            CHART="TRUE"
+          else
+            TAG_NAME="dev-$(date +%Y%m%d%H%M%S)"
+          fi
+          IMAGE_TAG="${REGISTRY}:${TAG_NAME}"
+
+          printf '%s' "$REGISTRY_PASSWORD" | docker login "$REGISTRY_HOST" \
+            --username "$REGISTRY_USERNAME" --password-stdin
+          printf '%s' "$QUAY_PASSWORD" | docker login "$QUAY_HOST" \
+            --username "$QUAY_USERNAME" --password-stdin
+          make docker-build docker-push IMG="${IMAGE_TAG}"
+          docker tag "$IMAGE_TAG" "${QUAY_IMAGE}:${TAG_NAME}"
+          docker push "${QUAY_IMAGE}:${TAG_NAME}"
+
+          if [[ "$CHART" == "TRUE" ]]; then
+            printf '%s' "$QUAY_PASSWORD" | helm registry login "$QUAY_HOST" \
+              --username "$QUAY_USERNAME" --password-stdin
+            make helm-push VERSION="${TAG_NAME}" HELM_REPO=quay.io/serialt/charts
+          fi
+
+          dingtalk_send() {
+            local title="$1" msg="$2" ts sign
+            urlencode(){ local s="$1" c i; for((i=0;i<${#s};i++));do c="${s:i:1}"; case "$c" in [a-zA-Z0-9.~_-]) printf %s "$c";; *) printf '%%%02X' "'${c}";; esac; done; }
+            json(){ local s="$1"; s=${s//\\/\\\\}; s=${s//\"/\\\"}; s=${s//$'\n'/\\n}; printf %s "$s"; }
+
+            ts=$(($(date +%s)*1000))
+            sign=$(urlencode "$(printf '%s\n%s' "$ts" "$DINGTALK_SECRET" | openssl dgst -sha256 -hmac "$DINGTALK_SECRET" -binary | base64 | tr -d '\n')")
+
+            curl -sS -H 'Content-Type: application/json' \
+              -d "{\"msgtype\":\"markdown\",\"markdown\":{\"title\":\"$(json "$title")\",\"text\":\"$(json "$msg")\"}}" \
+              "https://oapi.dingtalk.com/robot/send?access_token=$DINGTALK_ACCESS_TOKEN&timestamp=$ts&sign=$sign"
+          }
+          if [[ -n "$DINGTALK_ACCESS_TOKEN" && -n "$DINGTALK_SECRET" ]]; then
+            msg=$(printf '### 镜像构建成功\n\n- **Aliyun:** `%s`\n- **Quay:** `%s`' \
+              "$IMAGE_TAG" "${QUAY_IMAGE}:${TAG_NAME}")
+            dingtalk_send "GitHub Action" "$msg"
+          fi
