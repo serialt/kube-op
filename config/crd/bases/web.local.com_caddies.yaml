@@ -43,6 +43,8 @@ spec:
                 type: string
               image:
                 type: string
+              ingressClassName:
+                type: string
               port:
                 format: int32
                 type: integer
