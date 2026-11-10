@@ -11,6 +11,8 @@ env:
   QUAY_HOST: quay.io
   QUAY_IMAGE: quay.io/serialt
   QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+  CHART_NAME: caddy-operator
+  CHART_REPO: quay.io/serialt/charts
 
 jobs:
   build-and-push:
@@ -35,6 +37,7 @@ jobs:
           REGISTRY="${REGISTRY}/${IMAGE_NAME}"
           QUAY_IMAGE="${QUAY_IMAGE}/${IMAGE_NAME}"
           CHART="FALSE"
+          CHART_ADDRESS=""
           if [[ "$REF_NAME" == refs/tags/* ]]; then
             TAG_NAME="${REF_NAME#refs/tags/}"
             CHART="TRUE"
@@ -54,7 +57,9 @@ jobs:
           if [[ "$CHART" == "TRUE" ]]; then
             printf '%s' "$QUAY_PASSWORD" | helm registry login "$QUAY_HOST" \
               --username "$QUAY_USERNAME" --password-stdin
-            make helm-push VERSION="${TAG_NAME}" HELM_REPO=quay.io/serialt/charts
+            make helm-push VERSION="${TAG_NAME}" CHART_NAME="${CHART_NAME}" \
+              HELM_REPO="${CHART_REPO}"
+            CHART_ADDRESS="oci://${CHART_REPO}/${CHART_NAME}:${TAG_NAME}"
           fi
 
           dingtalk_send() {
@@ -70,7 +75,12 @@ jobs:
               "https://oapi.dingtalk.com/robot/send?access_token=$DINGTALK_ACCESS_TOKEN&timestamp=$ts&sign=$sign"
           }
           if [[ -n "$DINGTALK_ACCESS_TOKEN" && -n "$DINGTALK_SECRET" ]]; then
-            msg=$(printf '### 镜像构建成功\n\n- **Aliyun:** `%s`\n- **Quay:** `%s`' \
-              "$IMAGE_TAG" "${QUAY_IMAGE}:${TAG_NAME}")
+            if [[ -n "$CHART_ADDRESS" ]]; then
+              msg=$(printf '### 镜像构建成功\n\n- **Aliyun:** `%s`\n- **Quay:** `%s`\n- **Chart:** `%s`' \
+                "$IMAGE_TAG" "${QUAY_IMAGE}:${TAG_NAME}" "$CHART_ADDRESS")
+            else
+              msg=$(printf '### 镜像构建成功\n\n- **Aliyun:** `%s`\n- **Quay:** `%s`' \
+                "$IMAGE_TAG" "${QUAY_IMAGE}:${TAG_NAME}")
+            fi
             dingtalk_send "GitHub Action" "$msg"
           fi

@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM registry.cn-hangzhou.aliyuncs.com/serialt/golang:1.24 AS builder
+FROM golang:1.27.3-trixie AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -9,7 +9,6 @@ COPY go.mod go.mod
 COPY go.sum go.sum
 # cache deps before building and copying source so that we don't need to re-download as much
 # and so that source changes don't invalidate our downloaded layer
-ENV GOPROXY https://goproxy.cn,direct
 RUN go mod download
 
 # Copy the go source
@@ -26,7 +25,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o ma
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM registry.cn-hangzhou.aliyuncs.com/serialt/static:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot
 WORKDIR /
 COPY --from=builder /workspace/manager .
 USER 65532:65532
