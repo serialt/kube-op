@@ -238,6 +238,7 @@ $(LOCALBIN):
 KUBECTL ?= kubectl
 KIND ?= kind
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
+HELMIFY ?= $(LOCALBIN)/helmify
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
@@ -380,7 +381,7 @@ $(HELMIFY): $(LOCALBIN)
 helm: manifests kustomize helmify
 	rm -rf $(CHART_DIR)
 	mkdir -p $(dir $(CHART_DIR))
-	$(KUSTOMIZE) build config/default | helmify $(CHART_DIR)
+	$(KUSTOMIZE) build config/default | $(HELMIFY) $(CHART_DIR)
 
 .PHONY: helm-lint
 helm-lint: helm
