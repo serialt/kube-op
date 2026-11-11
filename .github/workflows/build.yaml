@@ -11,7 +11,7 @@ env:
   QUAY_HOST: quay.io
   QUAY_IMAGE: quay.io/serialt
   QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-  CHART_NAME: vscode-operator
+  CHART_NAME: vscode
   CHART_REPO: quay.io/serialt/charts
 
 jobs:
@@ -52,7 +52,7 @@ jobs:
 
           printf '%s' "$QUAY_PASSWORD" | helm registry login "$QUAY_HOST" \
             --username "$QUAY_USERNAME" --password-stdin
-          make helm-push VERSION="${CHART_VERSION}" CHART_NAME="${CHART_NAME}" \
+          make helm-push CHART_VERSION="${CHART_VERSION}" CHART_NAME="${CHART_NAME}" \
             HELM_REPO="${CHART_REPO}"
           CHART_ADDRESS="oci://${CHART_REPO}/${CHART_NAME}:${CHART_VERSION}"
 
