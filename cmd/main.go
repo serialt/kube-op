@@ -37,8 +37,8 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	webv1 "github.com/krabt/caddy-operator/api/v1"
-	"github.com/krabt/caddy-operator/internal/controller"
+	webv1 "github.com/krabt/kube-op/api/v1"
+	"github.com/krabt/kube-op/internal/controller"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -184,7 +184,7 @@ func main() {
 		WebhookServer:          webhookServer,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "73f8822f.local.com",
+		LeaderElectionID:       "027733e8.imau.cc",
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
@@ -202,11 +202,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := (&controller.VscodeReconciler{
+	if err := (&controller.VSCodeReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Vscode")
+		setupLog.Error(err, "unable to create controller", "controller", "VSCode")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

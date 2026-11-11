@@ -1,5 +1,5 @@
-apiVersion: web.local.com/v1
-kind: Vscode
+apiVersion: web.imau.cc/v1
+kind: VSCode
 metadata:
   labels:
     app.kubernetes.io/name: kube-op

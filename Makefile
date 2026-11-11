@@ -28,8 +28,8 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 # This variable is used to construct full image tags for bundle and catalog images.
 #
 # For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
-# local.com/kube-op-bundle:$VERSION and local.com/kube-op-catalog:$VERSION.
-IMAGE_TAG_BASE ?= local.com/kube-op
+# imau.cc/kube-op-bundle:$VERSION and imau.cc/kube-op-catalog:$VERSION.
+IMAGE_TAG_BASE ?= imau.cc/kube-op
 
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
@@ -48,7 +48,7 @@ endif
 
 # Set the Operator SDK version to use. By default, what is installed on the system is used.
 # This is useful for CI or a project to utilize a specific version of the operator-sdk toolkit.
-OPERATOR_SDK_VERSION ?= v1.42.2
+OPERATOR_SDK_VERSION ?= v1.42.3
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 
@@ -59,8 +59,8 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-CHART_NAME ?= caddy-operator
-CHART_DIR ?= dist/caddy-operator
+CHART_NAME ?= vscode-operator
+CHART_DIR ?= dist/vscode-operator
 CHART_VERSION ?= ${VERSION}
 APP_VERSION ?= latest
 HELM_REGISTRY ?= quay.io/serialt

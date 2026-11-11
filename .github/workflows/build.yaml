@@ -4,14 +4,14 @@ on:
   push:
 
 env:
-  IMAGE_NAME: caddy-op
+  IMAGE_NAME: vscode-op
   REGISTRY_HOST: registry.cn-hangzhou.aliyuncs.com
   REGISTRY: registry.cn-hangzhou.aliyuncs.com/serialt
   REGISTRY_USERNAME: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
   QUAY_HOST: quay.io
   QUAY_IMAGE: quay.io/serialt
   QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-  CHART_NAME: caddy-operator
+  CHART_NAME: vscode-operator
   CHART_REPO: quay.io/serialt/charts
 
 jobs:

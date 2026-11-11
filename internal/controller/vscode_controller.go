@@ -24,29 +24,29 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
-	webv1 "github.com/krabt/caddy-operator/api/v1"
+	webv1 "github.com/krabt/kube-op/api/v1"
 )
 
-// VscodeReconciler reconciles a Vscode object
-type VscodeReconciler struct {
+// VSCodeReconciler reconciles a VSCode object
+type VSCodeReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=web.local.com,resources=vscodes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=web.local.com,resources=vscodes/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=web.local.com,resources=vscodes/finalizers,verbs=update
+// +kubebuilder:rbac:groups=web.imau.cc,resources=vscodes,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=web.imau.cc,resources=vscodes/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=web.imau.cc,resources=vscodes/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
-// the Vscode object against the actual cluster state, and then
+// the VSCode object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
-func (r *VscodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *VSCodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = logf.FromContext(ctx)
 
 	// TODO(user): your logic here
@@ -55,9 +55,9 @@ func (r *VscodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *VscodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *VSCodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&webv1.Vscode{}).
+		For(&webv1.VSCode{}).
 		Named("vscode").
 		Complete(r)
 }

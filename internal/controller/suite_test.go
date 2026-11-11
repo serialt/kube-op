@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	webv1 "github.com/krabt/caddy-operator/api/v1"
+	webv1 "github.com/krabt/kube-op/api/v1"
 	// +kubebuilder:scaffold:imports
 )
 

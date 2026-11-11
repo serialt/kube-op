@@ -2,22 +2,22 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: local.com
+domain: imau.cc
 layout:
 - go.kubebuilder.io/v4
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: kube-op
-repo: github.com/krabt/caddy-operator
+repo: github.com/krabt/kube-op
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: local.com
+  domain: imau.cc
   group: web
-  kind: Vscode
-  path: github.com/krabt/caddy-operator/api/v1
+  kind: VSCode
+  path: github.com/krabt/kube-op/api/v1
   version: v1
 version: "3"

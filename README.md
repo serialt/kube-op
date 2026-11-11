@@ -1,6 +1,6 @@
-# Caddy Operator
+# VSCode Operator
 
-Caddy Operator is a Kubernetes operator that manages Caddy workloads through the namespaced `Caddy` custom resource (`web.local.com/v1`). For each resource, it reconciles a Deployment and Service. When `spec.domain` is set, it also creates an Ingress; clearing the domain removes the Ingress managed by that resource.
+VSCode Operator is a Kubernetes operator that manages VSCode workloads through the namespaced `VSCode` custom resource (`web.local.com/v1`). For each resource, it reconciles a Deployment and Service. When `spec.domain` is set, it also creates an Ingress; clearing the domain removes the Ingress managed by that resource.
 
 ## Prerequisites
 

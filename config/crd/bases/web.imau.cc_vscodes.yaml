@@ -4,12 +4,12 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: vscodes.web.local.com
+  name: vscodes.web.imau.cc
 spec:
-  group: web.local.com
+  group: web.imau.cc
   names:
-    kind: Vscode
-    listKind: VscodeList
+    kind: VSCode
+    listKind: VSCodeList
     plural: vscodes
     singular: vscode
   scope: Namespaced
@@ -17,7 +17,7 @@ spec:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: Vscode is the Schema for the vscodes API.
+        description: VSCode is the Schema for the vscodes API.
         properties:
           apiVersion:
             description: |-
@@ -37,15 +37,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: VscodeSpec defines the desired state of Vscode.
+            description: VSCodeSpec defines the desired state of VSCode.
             properties:
               foo:
-                description: Foo is an example field of Vscode. Edit vscode_types.go
+                description: Foo is an example field of VSCode. Edit vscode_types.go
                   to remove/update
                 type: string
             type: object
           status:
-            description: VscodeStatus defines the observed state of Vscode.
+            description: VSCodeStatus defines the observed state of VSCode.
             type: object
         type: object
     served: true

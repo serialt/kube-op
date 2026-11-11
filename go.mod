@@ -1,4 +1,4 @@
-module github.com/krabt/caddy-operator
+module github.com/krabt/kube-op
 
 go 1.27.3
 

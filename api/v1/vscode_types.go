@@ -23,17 +23,17 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// VscodeSpec defines the desired state of Vscode.
-type VscodeSpec struct {
+// VSCodeSpec defines the desired state of VSCode.
+type VSCodeSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Vscode. Edit vscode_types.go to remove/update
+	// Foo is an example field of VSCode. Edit vscode_types.go to remove/update
 	Foo string `json:"foo,omitempty"`
 }
 
-// VscodeStatus defines the observed state of Vscode.
-type VscodeStatus struct {
+// VSCodeStatus defines the observed state of VSCode.
+type VSCodeStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -41,24 +41,24 @@ type VscodeStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Vscode is the Schema for the vscodes API.
-type Vscode struct {
+// VSCode is the Schema for the vscodes API.
+type VSCode struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   VscodeSpec   `json:"spec,omitempty"`
-	Status VscodeStatus `json:"status,omitempty"`
+	Spec   VSCodeSpec   `json:"spec,omitempty"`
+	Status VSCodeStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// VscodeList contains a list of Vscode.
-type VscodeList struct {
+// VSCodeList contains a list of VSCode.
+type VSCodeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Vscode `json:"items"`
+	Items           []VSCode `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Vscode{}, &VscodeList{})
+	SchemeBuilder.Register(&VSCode{}, &VSCodeList{})
 }
