@@ -39,6 +39,9 @@ spec:
           spec:
             description: CaddySpec defines the desired state of Caddy.
             properties:
+              content:
+                maxLength: 1000000
+                type: string
               domain:
                 type: string
               image:

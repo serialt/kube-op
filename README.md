@@ -52,10 +52,12 @@ spec:
     port: 80
     svcPort: 80
     domain: caddy.example.com
+        content: |
+            <h1>Hello from Caddy</h1>
     # ingressClassName: nginx
 ```
 
-`replicas`, `image`, `port`, and `svcPort` configure the workload and Service. `domain` is optional; when set, the operator creates an Ingress routing `/` to the Service. `ingressClassName` is optional. The cluster must have an Ingress controller to serve that route.
+`replicas`, `image`, `port`, and `svcPort` configure the workload and Service. `content` is optional HTML served as `/var/www/html/index.html` by Caddy and is limited to 1 MB. When set, the image must include the `caddy` executable. `domain` is optional; when set, the operator creates an Ingress routing `/` to the Service. `ingressClassName` is optional. The cluster must have an Ingress controller to serve that route.
 
 Check the custom resource and the objects managed for it:
 

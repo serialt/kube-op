@@ -34,6 +34,8 @@ type CaddySpec struct {
 	SvcPort          int32  `json:"svcPort"`                    // Service 暴露的端口
 	Domain           string `json:"domain,omitempty"`           // Ingress 暴露使用的域名；未设置时不创建 Ingress
 	IngressClassName string `json:"ingressClassName,omitempty"` // IngressClassName 用于指定 Ingress 的类名；未设置时使用默认类IngressClassName
+	// +kubebuilder:validation:MaxLength=1000000
+	Content *string `json:"content,omitempty"` // HTML 页面内容，最大 1 MB
 }
 
 // CaddyStatus defines the observed state of Caddy.

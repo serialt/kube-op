@@ -21,6 +21,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -99,6 +101,44 @@ var _ = Describe("Caddy Controller", func() {
 			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(k8sClient.Get(ctx, typeNamespacedName, ingress)).To(MatchError(errors.IsNotFound, "be a not found error"))
+
+			content := "<h1>Hello from Caddy</h1>"
+			caddy.Spec.Content = &content
+			Expect(k8sClient.Update(ctx, caddy)).To(Succeed())
+			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			contentConfigMap := &corev1.ConfigMap{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, contentConfigMap)).To(Succeed())
+			Expect(contentConfigMap.Data).To(HaveKeyWithValue("index.html", content))
+
+			deployment := &appsv1.Deployment{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, deployment)).To(Succeed())
+			container := deployment.Spec.Template.Spec.Containers[0]
+			Expect(container.Command).To(Equal([]string{"caddy"}))
+			Expect(container.Args).To(Equal([]string{
+				"file-server", "--root", "/var/www/html", "--listen", ":80",
+			}))
+			Expect(container.VolumeMounts).To(ContainElement(corev1.VolumeMount{
+				Name: "web-content", MountPath: "/var/www/html", ReadOnly: true,
+			}))
+			Expect(deployment.Spec.Template.Spec.Volumes).To(ContainElement(corev1.Volume{
+				Name: "web-content",
+				VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: resourceName},
+					Items:                []corev1.KeyToPath{{Key: "index.html", Path: "index.html"}},
+				}},
+			}))
+
+			caddy.Spec.Content = nil
+			Expect(k8sClient.Update(ctx, caddy)).To(Succeed())
+			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(k8sClient.Get(ctx, typeNamespacedName, contentConfigMap)).To(MatchError(errors.IsNotFound, "be a not found error"))
+			Expect(k8sClient.Get(ctx, typeNamespacedName, deployment)).To(Succeed())
+			Expect(deployment.Spec.Template.Spec.Containers[0].Command).To(BeEmpty())
+			Expect(deployment.Spec.Template.Spec.Containers[0].Args).To(BeEmpty())
+			Expect(deployment.Spec.Template.Spec.Volumes).To(BeEmpty())
 		})
 	})
 })

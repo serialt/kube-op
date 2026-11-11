@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -46,6 +47,7 @@ type CaddyReconciler struct {
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 
 func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -62,6 +64,60 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	labels := map[string]string{
 		"app": caddy.Name,
+	}
+	contentConfigMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      caddy.Name,
+			Namespace: caddy.Namespace,
+		},
+	}
+	if caddy.Spec.Content != nil {
+		_, err := controllerutil.CreateOrUpdate(ctx, r.Client, contentConfigMap, func() error {
+			contentConfigMap.Data = map[string]string{"index.html": *caddy.Spec.Content}
+			return controllerutil.SetControllerReference(&caddy, contentConfigMap, r.Scheme)
+		})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	} else {
+		err := r.Get(ctx, client.ObjectKeyFromObject(contentConfigMap), contentConfigMap)
+		if err != nil && !apierrors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err == nil && metav1.IsControlledBy(contentConfigMap, &caddy) {
+			if err := r.Delete(ctx, contentConfigMap); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+	}
+
+	container := corev1.Container{
+		Name:  caddy.Name,
+		Image: caddy.Spec.Image,
+		Ports: []corev1.ContainerPort{{ContainerPort: caddy.Spec.Port}},
+	}
+	podSpec := corev1.PodSpec{Containers: []corev1.Container{container}}
+	if caddy.Spec.Content != nil {
+		container.Command = []string{"caddy"}
+		container.Args = []string{
+			"file-server",
+			"--root",
+			"/var/www/html",
+			"--listen",
+			fmt.Sprintf(":%d", caddy.Spec.Port),
+		}
+		container.VolumeMounts = []corev1.VolumeMount{{
+			Name:      "web-content",
+			MountPath: "/var/www/html",
+			ReadOnly:  true,
+		}}
+		podSpec.Volumes = []corev1.Volume{{
+			Name: "web-content",
+			VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{Name: contentConfigMap.Name},
+				Items:                []corev1.KeyToPath{{Key: "index.html", Path: "index.html"}},
+			}},
+		}}
 	}
 
 	// 创建 Deployment 对象
@@ -85,19 +141,7 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: labels,
 				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  caddy.Name,
-							Image: caddy.Spec.Image,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: caddy.Spec.Port,
-								},
-							},
-						},
-					},
-				},
+				Spec: podSpec,
 			},
 		}
 
@@ -204,6 +248,7 @@ func (r *CaddyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&webv1.Caddy{}).
 		Owns(&appsv1.Deployment{}).
+		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Service{}).
 		Owns(&networkingv1.Ingress{}).
 		Complete(r)
