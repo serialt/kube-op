@@ -12,9 +12,9 @@ spec:
   port: 80
   svcPort: 80
   domain: kubeop.ct.imau.cc
-  content: |
-    <!doctype html>
-    <html>
-      <body><h1>Hello from Caddy</h1></body>
-    </html>
+  # content: |
+  #   <!doctype html>
+  #   <html>
+  #     <body><h1>Hello from Caddy by Sugar</h1></body>
+  #   </html>
 
