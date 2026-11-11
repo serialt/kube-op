@@ -28,14 +28,19 @@ type VSCodeSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of VSCode. Edit vscode_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Image            string `json:"image"`                      // 对应 YAML 的 `spec.image`
+	Port             int32  `json:"port"`                       // 应用监听的端口
+	SvcPort          int32  `json:"svcPort"`                    // Service 暴露的端口
+	Domain           string `json:"domain,omitempty"`           // Ingress 暴露使用的域名；未设置时不创建 Ingress
+	IngressClassName string `json:"ingressClassName,omitempty"` // IngressClassName 用于指定 Ingress 的类名；未设置时使用默认类IngressClassName
 }
 
 // VSCodeStatus defines the observed state of VSCode.
 type VSCodeStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Conditions        []metav1.Condition `json:"conditions,omitempty"`
+	AvailableReplicas int32              `json:"available_replicas,omitempty"`
 }
 
 // +kubebuilder:object:root=true
