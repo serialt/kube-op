@@ -5,42 +5,9 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - ""
+  - web.local.com
   resources:
-  - configmaps
-  - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
+  - vscodes
   verbs:
   - create
   - delete
@@ -52,25 +19,13 @@ rules:
 - apiGroups:
   - web.local.com
   resources:
-  - caddies
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - web.local.com
-  resources:
-  - caddies/finalizers
+  - vscodes/finalizers
   verbs:
   - update
 - apiGroups:
   - web.local.com
   resources:
-  - caddies/status
+  - vscodes/status
   verbs:
   - get
   - patch

@@ -22,7 +22,7 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the kube-op itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
-- caddy_admin_role.yaml
-- caddy_editor_role.yaml
-- caddy_viewer_role.yaml
+- vscode_admin_role.yaml
+- vscode_editor_role.yaml
+- vscode_viewer_role.yaml
 

@@ -17,7 +17,7 @@ resources:
   controller: true
   domain: local.com
   group: web
-  kind: Caddy
+  kind: Vscode
   path: github.com/krabt/caddy-operator/api/v1
   version: v1
 version: "3"

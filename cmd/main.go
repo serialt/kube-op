@@ -202,11 +202,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := (&controller.CaddyReconciler{
+	if err := (&controller.VscodeReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Caddy")
+		setupLog.Error(err, "unable to create controller", "controller", "Vscode")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
