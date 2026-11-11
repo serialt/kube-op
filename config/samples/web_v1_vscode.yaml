@@ -1,9 +1,0 @@
-apiVersion: web.imau.cc/v1
-kind: VSCode
-metadata:
-  labels:
-    app.kubernetes.io/name: kube-op
-    app.kubernetes.io/managed-by: kustomize
-  name: vscode-sample
-spec:
-  # TODO(user): Add fields here

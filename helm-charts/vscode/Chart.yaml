@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: 4.13.0
+description: A Helm chart of Code Server for Kubernetes
+name: vscode
+type: application
+version: 0.0.3

@@ -59,10 +59,9 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-CHART_NAME ?= vscode-operator
-CHART_DIR ?= dist/vscode-operator
-CHART_VERSION ?= ${VERSION}
-APP_VERSION ?= latest
+CHART_NAME ?= vscode
+CHART_DIR ?= helm-charts/$(CHART_NAME)
+CHART_VERSION ?= 0.0.3
 HELM_REGISTRY ?= quay.io/serialt
 HELM_REPO ?= $(HELM_REGISTRY)/charts
 
@@ -187,16 +186,14 @@ docker-push: ## Push docker image with the manager.
 # - have enabled BuildKit. More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 # - be able to push the image to your registry (i.e. if you do not set a valid value via IMG=<myregistry/image:<tag>> then the export will fail)
 # To adequately provide solutions that are compatible with multiple platforms, you should consider using this option.
-PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
+PLATFORMS ?= linux/amd64,linux/arm64
 .PHONY: docker-buildx
 docker-buildx: ## Build and push docker image for the manager for cross-platform support
-	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
-	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
-	- $(CONTAINER_TOOL) buildx create --name kube-op-builder
-	$(CONTAINER_TOOL) buildx use kube-op-builder
-	- $(CONTAINER_TOOL) buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
-	- $(CONTAINER_TOOL) buildx rm kube-op-builder
-	rm Dockerfile.cross
+	@set -e; \
+	builder="kube-op-$$$$"; \
+	trap '$(CONTAINER_TOOL) buildx rm "$${builder}" >/dev/null 2>&1 || true' EXIT; \
+	$(CONTAINER_TOOL) buildx create --name "$${builder}" --driver docker-container; \
+	$(CONTAINER_TOOL) buildx build --builder "$${builder}" --platform=$(PLATFORMS) --tag $(IMG) --push .
 
 .PHONY: build-installer
 build-installer: manifests generate kustomize ## Generate a consolidated YAML with CRDs and deployment.
@@ -238,7 +235,6 @@ $(LOCALBIN):
 KUBECTL ?= kubectl
 KIND ?= kind
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
-HELMIFY ?= $(LOCALBIN)/helmify
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
@@ -370,21 +366,11 @@ catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
 
 
-.PHONY: helmify
-helmify: $(HELMIFY)
-
-$(HELMIFY): $(LOCALBIN)
-	@test -s $(HELMIFY) || \
-	GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
-
 .PHONY: helm
-helm: manifests kustomize helmify
-	rm -rf $(CHART_DIR)
-	mkdir -p $(dir $(CHART_DIR))
-	$(KUSTOMIZE) build config/default | $(HELMIFY) $(CHART_DIR)
+helm: helm-lint ## Validate the vscode Helm chart.
 
 .PHONY: helm-lint
-helm-lint: helm
+helm-lint: ## Lint the vscode Helm chart.
 	helm lint $(CHART_DIR)
 
 .PHONY: helm-package
@@ -392,8 +378,7 @@ helm-package: helm-lint
 	mkdir -p dist
 	helm package $(CHART_DIR) \
 		--destination dist \
-		--version $(CHART_VERSION) \
-		--app-version $(APP_VERSION)
+		--version $(CHART_VERSION)
 
 .PHONY: helm-push
 helm-push: helm-package

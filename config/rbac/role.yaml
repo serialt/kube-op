@@ -1,13 +1,42 @@
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: manager-role
 rules:
+##
+## Base operator rules
+##
+# We need to get namespaces so the operator can read namespaces to ensure they exist
 - apiGroups:
-  - web.imau.cc
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+# We need to manage Helm release secrets
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - "*"
+# We need to create events on CRs about things happening during reconciliation
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+
+##
+## Rules for charts.imau.cc/v1alpha1, Kind: VSCode
+##
+- apiGroups:
+  - charts.imau.cc
   resources:
   - vscodes
+  - vscodes/status
+  - vscodes/finalizers
   verbs:
   - create
   - delete
@@ -16,17 +45,20 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - web.imau.cc
+- verbs:
+  - "*"
+  apiGroups:
+  - ""
   resources:
-  - vscodes/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - web.imau.cc
+  - "configmaps"
+  - "secrets"
+  - "serviceaccounts"
+  - "services"
+- verbs:
+  - "*"
+  apiGroups:
+  - "apps"
   resources:
-  - vscodes/status
-  verbs:
-  - get
-  - patch
-  - update
+  - "deployments"
+
+# +kubebuilder:scaffold:rules

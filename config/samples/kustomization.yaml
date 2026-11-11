@@ -1,4 +1,4 @@
 ## Append samples of your project ##
 resources:
-- web_v1_vscode.yaml
+- charts_v1alpha1_vscode.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -1,0 +1,81 @@
+apiVersion: charts.imau.cc/v1alpha1
+kind: VSCode
+metadata:
+  name: vscode-sample
+spec:
+  # Default values copied from <project_dir>/helm-charts/vscode/values.yaml
+  affinity: {}
+  autoscaling:
+    enabled: false
+    maxReplicas: 100
+    minReplicas: 1
+    targetCPUUtilizationPercentage: 80
+  config:
+    HASHED_PASSWORD: $argon2i$v=19$m=4096,t=3,p=1$ndQZbJFPeeuSm8wbq8k8Mg$W1C5cXmuSoQD8f/vJQyujytoZEoG5DdJN1c8LUH9Ldo
+  fullnameOverride: ""
+  image:
+    mirror: docker.io/serialt
+    name: vscode
+    pullPolicy: IfNotPresent
+    tag: v4.13.0
+  imagePullSecrets: []
+  ingress:
+    annotations: {}
+    className: nginx
+    enabled: false
+    hosts:
+    - host: code.k3s.imau.tk
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+    tls: []
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+  nameOverride: ""
+  nodeSelector: {}
+  persistence:
+    accessModes:
+    - ReadWriteOnce
+    annotations: {}
+    enabled: false
+    finalizers: {}
+    mountPath: /data
+    selectorLabels: {}
+    size: 2Gi
+    storageClassName: ""
+    subPath: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+  replicaCount: 1
+  resources: {}
+  securityContext: {}
+  service:
+    port: 80
+    type: ClusterIP
+  serviceAccount:
+    annotations: {}
+    create: true
+    name: ""
+  tolerations: []
+  virtualService:
+    domainNames: []
+    enabled: false
+    istioGateways:
+    - istio-system/gateway-public
+    istioNamespace: istio-system
+  
+  

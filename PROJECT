@@ -4,20 +4,17 @@
 # More info: https://book.kubebuilder.io/reference/project-config.html
 domain: imau.cc
 layout:
-- go.kubebuilder.io/v4
+- helm.sdk.operatorframework.io/v1
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: kube-op
-repo: github.com/krabt/kube-op
 resources:
 - api:
     crdVersion: v1
     namespaced: true
-  controller: true
   domain: imau.cc
-  group: web
+  group: charts
   kind: VSCode
-  path: github.com/krabt/kube-op/api/v1
-  version: v1
+  version: v1alpha1
 version: "3"

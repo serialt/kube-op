@@ -58,10 +58,9 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - command:
-        - /manager
-        args:
+      - args:
           - --leader-elect
+          - --leader-election-id=kube-op
           - --health-probe-bind-address=:8081
         image: controller:latest
         name: manager
