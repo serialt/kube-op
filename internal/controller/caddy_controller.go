@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -98,17 +97,9 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	podSpec := corev1.PodSpec{Containers: []corev1.Container{container}}
 	if caddy.Spec.Content != nil {
-		container.Command = []string{"caddy"}
-		container.Args = []string{
-			"file-server",
-			"--root",
-			"/var/www/html",
-			"--listen",
-			fmt.Sprintf(":%d", caddy.Spec.Port),
-		}
 		container.VolumeMounts = []corev1.VolumeMount{{
 			Name:      "web-content",
-			MountPath: "/var/www/html",
+			MountPath: "/usr/share/caddy",
 			ReadOnly:  true,
 		}}
 		podSpec.Volumes = []corev1.Volume{{
