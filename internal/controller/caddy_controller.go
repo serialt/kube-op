@@ -90,27 +90,6 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		}
 	}
 
-	container := corev1.Container{
-		Name:  caddy.Name,
-		Image: caddy.Spec.Image,
-		Ports: []corev1.ContainerPort{{ContainerPort: caddy.Spec.Port}},
-	}
-	podSpec := corev1.PodSpec{Containers: []corev1.Container{container}}
-	if caddy.Spec.Content != nil {
-		container.VolumeMounts = []corev1.VolumeMount{{
-			Name:      "web-content",
-			MountPath: "/usr/share/caddy",
-			ReadOnly:  true,
-		}}
-		podSpec.Volumes = []corev1.Volume{{
-			Name: "web-content",
-			VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{Name: contentConfigMap.Name},
-				Items:                []corev1.KeyToPath{{Key: "index.html", Path: "index.html"}},
-			}},
-		}}
-	}
-
 	// 创建 Deployment 对象
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -123,6 +102,27 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 
 	result, err := controllerutil.CreateOrUpdate(ctx, r.Client, deploy, func() error {
+		container := corev1.Container{
+			Name:  caddy.Name,
+			Image: caddy.Spec.Image,
+			Ports: []corev1.ContainerPort{{ContainerPort: caddy.Spec.Port}},
+		}
+		podSpec := corev1.PodSpec{Containers: []corev1.Container{container}}
+		if caddy.Spec.Content != nil {
+			podSpec.Containers[0].VolumeMounts = []corev1.VolumeMount{{
+				Name:      "web-content",
+				MountPath: "/var/www/html",
+				ReadOnly:  true,
+			}}
+			podSpec.Volumes = []corev1.Volume{{
+				Name: "web-content",
+				VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: contentConfigMap.Name},
+					Items:                []corev1.KeyToPath{{Key: "index.html", Path: "index.html"}},
+				}},
+			}}
+		}
+
 		deploy.Spec = appsv1.DeploymentSpec{
 			Replicas: &caddy.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
