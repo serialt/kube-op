@@ -111,7 +111,7 @@ func (r *CaddyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		if caddy.Spec.Content != nil {
 			podSpec.Containers[0].VolumeMounts = []corev1.VolumeMount{{
 				Name:      "web-content",
-				MountPath: "/var/www/html",
+				MountPath: "/usr/share/caddy",
 				ReadOnly:  true,
 			}}
 			podSpec.Volumes = []corev1.Volume{{
